@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="hi" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>My Flow AI - अपनी कल्पना को AI वीडियो में बदलें</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#080511',
+              card: '#120d24',
+              purple: '#8b5cf6',
+              blue: '#3b82f6'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #080511;
+      color: #f3f4f6;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .gradient-border {
+      border: 1px solid rgba(139, 92, 246, 0.25);
+    }
+    .glow-effect {
+      box-shadow: 0 0 35px -5px rgba(139, 92, 246, 0.3);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-purple-600 selection:text-white">
+
+  <!-- ================= NAVBAR ================= -->
+  <header class="sticky top-0 z-50 bg-[#080511]/90 backdrop-blur-md border-b border-purple-900/30">
+    <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+      <!-- Logo -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-500 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-purple-600/30">
+          F
+        </div>
+        <div>
+          <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">
+            My Flow AI
+          </span>
+          <span class="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded border border-purple-500/30 ml-1">
+            Free Engine
+          </span>
+        </div>
+      </div>
+
+      <!-- Right Controls -->
+      <div class="flex items-center gap-2.5">
+        <!-- Daily Limit Badge -->
+        <div id="quotaBadge" class="text-xs bg-purple-950/70 border border-purple-700/40 px-2.5 py-1.5 rounded-xl text-purple-200 font-medium">
+          आज: <span id="quotaCount" class="text-white font-bold">0/2</span>
+        </div>
+
+        <!-- Language Switcher -->
+        <button id="langToggleBtn" onclick="toggleLanguage()" class="flex items-center gap-1 text-xs bg-slate-900 border border-slate-700 hover:border-purple-500 px-2.5 py-1.5 rounded-xl transition-all">
+          <i data-lucide="globe" class="w-3.5 h-3.5 text-purple-400"></i>
+          <span id="langLabel">English</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="max-w-3xl mx-auto px-4 py-6 w-full flex-1">
+    
+    <!-- Hero Title -->
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-700/30 text-purple-300 text-xs font-medium mb-3">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i>
+        <span id="txtTagline">अपनी कल्पना को AI वीडियो में बदलें</span>
+      </div>
+      <h1 id="txtHeroTitle" class="text-2xl sm:text-4xl font-extrabold tracking-tight mb-2">
+        AI की मदद से अपनी कल्पना को वीडियो में बदलें
+      </h1>
+      <p id="txtHeroSub" class="text-xs sm:text-sm text-slate-400 max-w-lg mx-auto">
+        अपना आइडिया लिखें या फोटो अपलोड करें। बिना किसी भुगतान के सीधे अपने फोन में वीडियो जनरेट करें।
+      </p>
+    </div>
+
+    <!-- Generator Card -->
+    <div class="bg-[#120d24] gradient-border rounded-3xl p-4 sm:p-6 glow-effect">
+      
+      <!-- Mode Tabs (Text to Video / Image to Video) -->
+      <div class="grid grid-cols-2 bg-slate-950/80 p-1.5 rounded-2xl mb-5 border border-purple-900/30">
+        <button id="tabText" onclick="setMode('text')" class="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md">
+          <i data-lucide="video" class="w-4 h-4"></i>
+          <span id="txtTabText">टेक्स्ट से वीडियो</span>
+        </button>
+        <button id="tabImage" onclick="setMode('image')" class="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all text-slate-400 hover:text-white">
+          <i data-lucide="image" class="w-4 h-4"></i>
+          <span id="txtTabImage">फोटो से वीडियो</span>
+        </button>
+      </div>
+
+      <!-- Mode 1: Text To Video Form -->
+      <div id="textModeBox" class="space-y-4">
+        <div>
+          <label id="lblPrompt" class="block text-xs font-semibold text-purple-300 mb-1.5">
+            वीडियो का प्रॉम्प्ट (आइडिया लिखें):
+          </label>
+          <textarea 
+            id="promptInput" 
+            rows="3" 
+            placeholder="उदा: एक भारतीय गाँव में सुबह का सुंदर दृश्य, हरे-भरे खेत, सिनेमैटिक कैमरा..."
+            class="w-full bg-[#080511] border border-slate-700 rounded-2xl p-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Mode 2: Image To Video Form (Hidden by default) -->
+      <div id="imageModeBox" class="hidden space-y-4">
+        <div>
+          <label id="lblImagePrompt" class="block text-xs font-semibold text-purple-300 mb-1.5">
+            गैलरी से फोटो चुनें:
+          </label>
+          
+          <!-- Upload Area -->
+          <div id="dropZone" onclick="document.getElementById('fileInput').click()" class="border-2 border-dashed border-purple-800/60 hover:border-purple-500 rounded-2xl p-4 text-center cursor-pointer bg-[#080511]/50 transition-all">
+            <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)" />
+            <i data-lucide="upload-cloud" class="w-8 h-8 text-purple-400 mx-auto mb-2"></i>
+            <p id="txtUploadInstruction" class="text-xs text-slate-300 font-medium">फोटो चुनने के लिए यहाँ टैप करें</p>
+            <p class="text-[10px] text-slate-500 mt-0.5">PNG, JPG, WEBP (अधिकतम 10MB)</p>
+          </div>
+
+          <!-- Image Preview Area -->
+          <div id="previewContainer" class="hidden mt-3 relative bg-[#080511] rounded-2xl p-2 border border-purple-900/40">
+            <img id="imagePreview" src="" alt="Uploaded Preview" class="w-full max-h-48 object-contain rounded-xl mx-auto" />
+            <div class="flex justify-between items-center mt-2 px-1">
+              <span class="text-xs text-green-400 flex items-center gap-1">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> फोटो लोड हो गई
+              </span>
+              <button onclick="removeImage()" class="text-xs text-red-400 hover:text-red-300 font-medium flex items-center gap-1">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> फोटो हटाएँ
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label id="lblMotionPrompt" class="block text-xs font-semibold text-purple-300 mb-1.5">
+            फोटो में क्या मूवमेंट होना चाहिए?
+          </label>
+          <input 
+            type="text" 
+            id="imageMotionPrompt" 
+            placeholder="उदा: कैमरा धीरे-धीरे पास आए और चेहरा हल्का मुस्कुराए..."
+            class="w-full bg-[#080511] border border-slate-700 rounded-xl p-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+          />
+        </div>
+      </div>
+
+      <!-- Shared Controls (Style, Camera, Aspect Ratio, Duration) -->
+      <div class="mt-4 pt-4 border-t border-purple-950/80 space-y-4">
+        
+        <div class="grid grid-cols-2 gap-3">
+          <!-- Style -->
+          <div>
+            <label id="lblStyle" class="block text-[11px] font-semibold text-slate-400 mb-1">वीडियो स्टाइल</label>
+            <select id="styleSelect" class="w-full bg-[#080511] border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-purple-500">
+              <option value="Cinematic">Cinematic (सिनेमैटिक)</option>
+              <option value="3D Cartoon">3D Cartoon (कार्टून)</option>
+              <option value="Realistic">Realistic (वास्तविक)</option>
+              <option value="Village Life">Village Life (गाँव का जीवन)</option>
+              <option value="Nature">Nature (प्रकृति)</option>
+              <option value="Kids Animation">Kids Animation (बच्चों का)</option>
+            </select>
+          </div>
+
+          <!-- Camera Movement -->
+          <div>
+            <label id="lblCamera" class="block text-[11px] font-semibold text-slate-400 mb-1">कैमरा मूवमेंट</label>
+            <select id="cameraSelect" class="w-full bg-[#080511] border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-purple-500">
+              <option value="zoom_in">Slow Zoom In (धीरे पास आना)</option>
+              <option value="zoom_out">Slow Zoom Out (धीरे दूर जाना)</option>
+              <option value="pan_left">Pan Left (बाएँ घूमना)</option>
+              <option value="pan_right">Pan Right (दाएँ घूमना)</option>
+              <option value="handheld">Cinematic Float (सिनेमैटिक फ्लोट)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <!-- Aspect Ratio -->
+          <div>
+            <label id="lblRatio" class="block text-[11px] font-semibold text-slate-400 mb-1">वीडियो अनुपात (Ratio)</label>
+            <div class="grid grid-cols-3 gap-1">
+              <button type="button" onclick="setRatio('9:16')" id="ratio916" class="py-2 text-[10px] font-bold rounded-lg border border-purple-500 bg-purple-500/20 text-purple-200">
+                9:16 (Shorts)
+              </button>
+              <button type="button" onclick="setRatio('16:9')" id="ratio169" class="py-2 text-[10px] font-bold rounded-lg border border-slate-700 bg-slate-900 text-slate-400">
+                16:9 (YT)
+              </button>
+              <button type="button" onclick="setRatio('1:1')" id="ratio11" class="py-2 text-[10px] font-bold rounded-lg border border-slate-700 bg-slate-900 text-slate-400">
+                1:1 (Square)
+              </button>
+            </div>
+          </div>
+
+          <!-- Duration -->
+          <div>
+            <label id="lblDuration" class="block text-[11px] font-semibold text-slate-400 mb-1">वीडियो अवधि</label>
+            <select id="durationSelect" class="w-full bg-[#080511] border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-purple-500">
+              <option value="5">5 सेकंड (Free Instant)</option>
+              <option value="10">10 सेकंड</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Generate Button -->
+      <button 
+        id="generateBtn" 
+        onclick="startGeneration()" 
+        class="w-full mt-6 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:opacity-95 text-white font-extrabold py-4 rounded-2xl flex items-center justify-center gap-2.5 shadow-xl shadow-purple-900/40 transition-all text-base active:scale-[0.98]"
+      >
+        <i data-lucide="sparkles" class="w-5 h-5"></i>
+        <span id="txtGenerateBtn">नया वीडियो बनाएँ</span>
+      </button>
+
+      <!-- Rendering Progress Box (Hidden by default) -->
+      <div id="progressBox" class="hidden mt-5 p-4 rounded-2xl bg-purple-950/40 border border-purple-700/40">
+        <div class="flex items-center justify-between text-xs text-purple-200 mb-2">
+          <span id="txtProgressState" class="flex items-center gap-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-purple-400 animate-ping"></span>
+            वीडियो फ्रेम रेंडर हो रहे हैं...
+          </span>
+          <span id="progressPercent" class="font-bold">0%</span>
+        </div>
+        <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden">
+          <div id="progressBar" class="bg-gradient-to-r from-purple-500 to-blue-500 h-full w-0 transition-all duration-200"></div>
+        </div>
+      </div>
+
+      <!-- Error Box -->
+      <div id="errorBox" class="hidden mt-4 p-3 bg-red-950/70 border border-red-500/50 rounded-xl text-xs text-red-200 flex items-center gap-2">
+        <i data-lucide="alert-circle" class="w-4 h-4 text-red-400 flex-shrink-0"></i>
+        <span id="errorMessage"></span>
+      </div>
+
+      <!-- Video Output & Download Box -->
+      <div id="outputBox" class="hidden mt-6 pt-5 border-t border-purple-900/40">
+        <h3 id="txtOutputTitle" class="text-xs font-bold text-green-400 mb-2 flex items-center gap-1.5">
+          <i data-lucide="check-circle-2" class="w-4 h-4"></i> आपका वीडियो तैयार है!
+        </h3>
+        
+        <!-- Video Player -->
+        <div class="rounded-2xl overflow-hidden bg-black border border-slate-800 shadow-2xl">
+          <video id="finalVideoPlayer" controls playsinline class="w-full max-h-[380px] mx-auto bg-black"></video>
+        </div>
+
+        <!-- Download Action -->
+        <div class="mt-4 flex flex-col sm:flex-row gap-2.5">
+          <a 
+            id="downloadAnchor" 
+            href="#" 
+            download="MyFlowAI_Video.mp4" 
+            class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm shadow-lg shadow-green-900/30 transition-all active:scale-[0.98]"
+          >
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span id="txtDownloadBtn">वीडियो डाउनलोड करें (MP4)</span>
+          </a>
+          <button 
+            onclick="resetStudio()" 
+            class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-3 px-4 rounded-xl text-xs transition-all"
+          >
+            नया बनाएँ
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Hidden Offscreen Canvas for Real Video Synthesis -->
+    <canvas id="renderCanvas" class="hidden"></canvas>
+
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="text-center py-4 text-slate-500 text-[11px] border-t border-white/5">
+    <p>© 2026 My Flow AI - 100% Client-Side Engine (Free & Private)</p>
+  </footer>
+
+  <!-- ================= JAVASCRIPT ENGINE ================= -->
+  <script>
+    // 1. DUAL LANGUAGE DICTIONARY
+    let currentLang = 'hi';
+    const translations = {
+      hi: {
+        tagline: "अपनी कल्पना को AI वीडियो में बदलें",
+        heroTitle: "AI की मदद से अपनी कल्पना को वीडियो में बदलें",
+        heroSub: "अपना आइडिया लिखें या फोटो अपलोड करें। बिना किसी भुगतान के सीधे अपने फोन में वीडियो जनरेट करें।",
+        tabText: "टेक्स्ट से वीडियो",
+        tabImage: "फोटो से वीडियो",
+        promptLbl: "वीडियो का प्रॉम्प्ट (आइडिया लिखें):",
+        promptPlh: "उदा: एक भारतीय गाँव में सुबह का सुंदर दृश्य, हरे-भरे खेत, सिनेमैटिक कैमरा...",
+        imagePromptLbl: "गैलरी से फोटो चुनें:",
+        uploadInst: "फोटो चुनने के लिए यहाँ टैप करें",
+        motionLbl: "फोटो में क्या मूवमेंट होना चाहिए?",
+        motionPlh: "उदा: कैमरा धीरे-धीरे पास आए और चेहरा हल्का मुस्कुराए...",
+        styleLbl: "वीडियो स्टाइल",
+        cameraLbl: "कैमरा मूवमेंट",
+        ratioLbl: "वीडियो अनुपात (Ratio)",
+        durationLbl: "वीडियो अवधि",
+        generateBtn: "नया वीडियो बनाएँ",
+        rendering: "वीडियो फ्रेम रेंडर हो रहे हैं...",
+        videoReady: "आपका वीडियो तैयार है!",
+        downloadBtn: "वीडियो डाउनलोड करें (MP4)",
+        todayCount: "आज: ",
+        limitReached: "आज की फ्री वीडियो लिमिट पूरी हो गई है (2/2)। कल पुनः प्रयास करें!"
+      },
+      en: {
+        tagline: "Turn your imagination into AI Video",
+        heroTitle: "Transform Your Imagination into Videos with AI",
+        heroSub: "Type your ideas or upload photos. Generate and download videos directly on your phone for free.",
+        tabText: "Text to Video",
+        tabImage: "Image to Video",
+        promptLbl: "Video Prompt (Describe your idea):",
+        promptPlh: "E.g. Sunrise in a picturesque Indian village, lush green fields, cinematic camera...",
+        imagePromptLbl: "Upload Photo from Gallery:",
+        uploadInst: "Tap here to select an image",
+        motionLbl: "Desired camera & character motion:",
+        motionPlh: "E.g. Slow cinematic zoom-in with joyful movement...",
+        styleLbl: "Video Style",
+        cameraLbl: "Camera Motion",
+        ratioLbl: "Aspect Ratio",
+        durationLbl: "Video Duration",
+        generateBtn: "Generate Video",
+        rendering: "Synthesizing video frames...",
+        videoReady: "Your video is ready!",
+        downloadBtn: "Downl
